@@ -1,0 +1,18 @@
+import type { User } from '$lib/auth';
+
+// See https://svelte.dev/docs/kit/types#app.d.ts
+// for information about these interfaces
+declare global {
+	namespace App {
+		// interface Error {}
+		interface Locals {
+			/** only exists if cryptographically verified */
+			user: User | null;
+		}
+		// interface PageData {}
+		// interface PageState {}
+		// interface Platform {}
+	}
+}
+
+export {};

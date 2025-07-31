@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono&display=swap');
+
+:root {
+	--text: #eee;
+	--text-translucent: #eee2;
+	--light: #181818;
+	--light-2: #252525;
+	--bg: #080808;
+	--accent: #009959;
+	--accent-text: #fff;
+
+	--nav: #00643a;
+	--nav-closed-width: 3.5rem; /* 56px */
+	--nav-open-width: 12.5rem; /* 200px */
+
+	--red: #b00020;
+	--red-text: white;
+	--yellow: #fc0;
+	--yellow-text: black;
+	--green: #009959;
+	--green-text: #fff;
+	--grey: #333;
+	--grey-text: #ccc;
+	
+	color-scheme: dark;
+	accent-color: var(--accent);
+}
+
+body {
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+	/* overflow: hidden; */
+	
+	background-color: var(--bg);
+	color: var(--text);
+
+	font-family: 'DM Sans', sans-serif;
+	font-size: 1.2em;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+	overflow-x: hidden;
+}
+
+* {
+	box-sizing: border-box;
+	/* outline: 1px solid red; */
+}
+
+button,
+input,
+select,
+textarea {
+	font-size: .7em;
+	font-family: inherit;
+	color: var(--text);
+	background: var(--light);
+	border: none;
+	border-radius: .5em;
+	padding: 1em;
+	cursor: pointer;
+
+	&:disabled {
+		filter: contrast(0.8);
+		opacity: 0.8;
+	}
+
+	/* &:not([disabled]):active {
+		filter: contrast(0.6);
+		transform: translate(0, 1px);
+	} */
+}
+
+.accent {
+	background-color: var(--accent);
+	color: var(--accent-text);
+}
+
+.red {
+	background-color: var(--red);
+	color: var(--red-text);
+}
+
+.yellow {
+	background-color: var(--yellow);
+	color: var(--yellow-text);
+}
+
+.grey {
+	background-color: var(--grey);
+	color: var(--grey-text);
+}
