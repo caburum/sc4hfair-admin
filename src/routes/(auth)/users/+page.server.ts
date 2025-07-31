@@ -11,7 +11,7 @@ export type Change = { user: DbUser; role: Role; action: 'add' | 'remove' };
 const level: Role[] = ['admin']; // in future, could allow lower roles access to promote others
 
 export const load: PageServerLoad = async ({ locals }) => {
-	await authenticate(locals.user, level);
+	authenticate(locals.user, level);
 
 	const users = await db
 		.collection('users')
@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	apply: async ({ locals, request }) => {
-		await authenticate(locals.user, level);
+		authenticate(locals.user, level);
 
 		const data = await request.formData();
 		const changes = JSON.parse(data.get('changes') as string) as Change[];

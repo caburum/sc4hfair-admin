@@ -4,7 +4,10 @@ import type { User } from '$lib/auth';
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			message: string;
+			stack?: string;
+		}
 		interface Locals {
 			/** only exists if cryptographically verified */
 			user: User | null;

@@ -35,8 +35,7 @@ export async function validateSession(session_token: string | null): Promise<Use
 }
 
 /** requires a logged in user, optionally with specific roles */
-export async function authenticate(user: User | null, requiredRoles: Role[] = []): Promise<void> {
-	if (!user || !isPermitted(user!.roles, requiredRoles)) {
-		throw error(401, 'Unauthorized');
-	}
+export function authenticate(user: User | null, requiredRoles: Role[] = []) {
+	if (!user) throw error(401, 'Unauthorized');
+	if (!isPermitted(user!.roles, requiredRoles)) throw error(403, 'Forbidden');
 }
