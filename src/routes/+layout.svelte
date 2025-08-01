@@ -8,7 +8,7 @@
 	let { data, children }: LayoutProps = $props();
 
 	let authenticated = $state(data.user !== null);
-	let title = $derived(
+	let route = $derived(
 		['sc4hfair-admin', ...page.url.pathname.split('/').slice(1)].filter(Boolean)
 	);
 
@@ -16,7 +16,7 @@
 </script>
 
 <svelte:head>
-	<title>{title.toReversed().join(' | ')}</title>
+	<title>{route.toReversed().join(' | ')}</title>
 </svelte:head>
 
 <div class="layout" class:open>
@@ -40,7 +40,13 @@
 
 	<header>
 		<Clover />
-		<h1>{title.join(' ▸ ')}</h1>
+		<h1>
+			{#each route as segment, i}
+				<span>
+					<a href={'/' + route.slice(1, i + 1).join('/')}>{segment}</a>
+				</span>
+			{/each}
+		</h1>
 	</header>
 
 	<main>
@@ -51,7 +57,68 @@
 <style>
 	.layout {
 		--transition-duration: 0.3s;
+
+		display: grid;
+		grid-template:
+			'header' var(--nav-closed-width)
+			'main' auto / auto;
+		min-height: 100vh;
+		padding: var(--gap);
+		gap: var(--gap);
+		overflow: hidden;
 	}
+
+	header,
+	main {
+		transition: margin-left var(--transition-duration) ease-in-out;
+	}
+
+	.layout.open header,
+	.layout.open main {
+		margin-left: calc(var(--nav-open-width) + var(--gap));
+	}
+
+	header {
+		grid-area: header;
+		margin-left: calc(var(--nav-closed-width) + var(--gap));
+
+		display: flex;
+		align-items: center;
+		overflow: hidden;
+	}
+
+	header :global(svg) {
+		height: 2rem;
+		width: 2rem;
+		margin-right: 0.5rem;
+	}
+
+	header h1 {
+		font-size: 1.5rem;
+		flex: 1;
+		max-width: 100%;
+		text-align: left;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		direction: rtl;
+		white-space: nowrap;
+	}
+
+	header h1 span:not(:first-child)::before {
+		content: ' ▸ ';
+	}
+
+	header h1 a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	main {
+		grid-area: main;
+		overflow: auto;
+	}
+
+	/* navigation button & menu */
 
 	nav {
 		position: fixed;
@@ -72,12 +139,6 @@
 	.layout:not(.open) nav {
 		width: var(--nav-closed-width);
 		height: var(--nav-closed-width);
-		padding: 0;
-		justify-content: center;
-	}
-
-	.layout:not(.open) nav ul {
-		display: none;
 	}
 
 	nav ul {
@@ -118,6 +179,7 @@
 		cursor: pointer;
 		font-size: inherit;
 		font-family: inherit;
+		font-weight: inherit;
 		text-align: left;
 		width: 100%;
 	}
@@ -182,49 +244,5 @@
 	}
 	.layout.open .hamburger-icon::after {
 		transform: rotate(-45deg);
-	}
-
-	.layout {
-		display: grid;
-		grid-template:
-			'header' var(--nav-closed-width)
-			'main' auto / auto;
-		min-height: 100vh;
-		padding: var(--gap);
-		gap: var(--gap);
-		overflow: hidden;
-	}
-
-	header,
-	main {
-		transition: margin-left var(--transition-duration) ease-in-out;
-	}
-
-	header {
-		grid-area: header;
-		margin-left: calc(var(--nav-closed-width) + var(--gap));
-
-		display: flex;
-		align-items: center;
-	}
-
-	header :global(svg) {
-		height: 2rem;
-		width: 2rem;
-		margin-right: 0.5rem;
-	}
-
-	header h1 {
-		font-size: 1.5rem;
-	}
-
-	main {
-		grid-area: main;
-		overflow: auto;
-	}
-
-	.layout.open header,
-	.layout.open main {
-		margin-left: calc(var(--nav-open-width) + var(--gap));
 	}
 </style>
