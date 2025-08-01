@@ -1,25 +1,22 @@
 <script lang="ts">
-	import type { LayoutProps } from './$types';
-
 	import { page } from '$app/state';
+	import Clover from '$lib/assets/Clover.svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import '../app.css';
+	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
 
 	let authenticated = $state(data.user !== null);
 	let title = $derived(
-		['sc4hfair-admin', ...page.url.pathname.split('/').slice(1)]
-			.filter(Boolean)
-			.reverse()
-			.join(' | ')
+		['sc4hfair-admin', ...page.url.pathname.split('/').slice(1)].filter(Boolean)
 	);
 
 	let open = $derived(new MediaQuery('(min-width: 768px)').current);
 </script>
 
 <svelte:head>
-	<title>{title}</title>
+	<title>{title.toReversed().join(' | ')}</title>
 </svelte:head>
 
 <div class="layout" class:open>
@@ -29,6 +26,7 @@
 		</button>
 		<ul>
 			{#if authenticated}
+				<li><a href="/">info</a></li>
 				<li><a href="/users">users</a></li>
 				<li><a href="/data">data</a></li>
 				<li>
@@ -41,7 +39,8 @@
 	</nav>
 
 	<header>
-		<h1>{title}</h1>
+		<Clover />
+		<h1>{title.join(' ▸ ')}</h1>
 	</header>
 
 	<main>
@@ -50,6 +49,10 @@
 </div>
 
 <style>
+	.layout {
+		--transition-duration: 0.3s;
+	}
+
 	nav {
 		position: fixed;
 		top: 1rem;
@@ -59,7 +62,7 @@
 		height: calc(100% - 2rem);
 		background: var(--nav);
 		border-radius: 1rem;
-		transition: all 0.3s ease-in-out;
+		transition: all var(--transition-duration) ease-in-out;
 		z-index: 100;
 		display: flex;
 		flex-direction: column;
@@ -94,7 +97,7 @@
 		margin-left: var(--gap);
 	}
 
-	nav li:last-child {
+	nav li:not(:first-child):last-child {
 		margin-top: auto;
 	}
 
@@ -126,7 +129,7 @@
 		top: 0;
 		left: 50%;
 		transform: translateX(-50%);
-		transition: all 0.3s ease-in-out;
+		transition: all var(--transition-duration) ease-in-out;
 
 		background: none;
 		border: none;
@@ -154,7 +157,7 @@
 		width: 1.5rem;
 		border-radius: 0.125rem;
 		transition:
-			transform 0.3s ease-in-out,
+			transform var(--transition-duration) ease-in-out,
 			background-color 0.1s ease-in-out;
 	}
 
@@ -192,12 +195,23 @@
 		overflow: hidden;
 	}
 
+	header,
+	main {
+		transition: margin-left var(--transition-duration) ease-in-out;
+	}
+
 	header {
 		grid-area: header;
 		margin-left: calc(var(--nav-closed-width) + var(--gap));
 
 		display: flex;
 		align-items: center;
+	}
+
+	header :global(svg) {
+		height: 2rem;
+		width: 2rem;
+		margin-right: 0.5rem;
 	}
 
 	header h1 {
@@ -207,16 +221,6 @@
 	main {
 		grid-area: main;
 		overflow: auto;
-		/* transition: margin-left 0.3s ease-in-out;
-		
-		margin: 1rem;
-		margin-top: calc(var(--nav-closed-width) + 2rem);
-		 */
-	}
-
-	header,
-	main {
-		transition: margin-left 0.3s ease-in-out;
 	}
 
 	.layout.open header,

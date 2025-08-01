@@ -10,16 +10,6 @@
 	}
 </script>
 
-<section>
-	<button onclick={() => login('google')}>login with google</button>
-</section>
+<button onclick={() => login('google')}>login with google</button>
 
-<style>
-	section {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		/* fixme: */
-		height: 100%;
-	}
-</style>
+<!-- todo: login with password for fixed roles -->
