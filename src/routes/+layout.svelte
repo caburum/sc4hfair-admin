@@ -2,6 +2,7 @@
 	import type { LayoutProps } from './$types';
 
 	import { page } from '$app/state';
+	import { MediaQuery } from 'svelte/reactivity';
 	import '../app.css';
 
 	let { data, children }: LayoutProps = $props();
@@ -14,7 +15,7 @@
 			.join(' | ')
 	);
 
-	let open = $state(false);
+	let open = $derived(new MediaQuery('(min-width: 768px)').current);
 </script>
 
 <svelte:head>
@@ -28,16 +29,20 @@
 		</button>
 		<ul>
 			{#if authenticated}
+				<li><a href="/users">users</a></li>
+				<li><a href="/data">data</a></li>
 				<li>
 					<form action="/api/auth/logout" method="POST"><button type="submit">logout</button></form>
 				</li>
-				<li><a href="/users">users</a></li>
-				<li><a href="/data">data</a></li>
 			{:else}
 				<li><a href="/login">login</a></li>
 			{/if}
 		</ul>
 	</nav>
+
+	<header>
+		<h1>{title}</h1>
+	</header>
 
 	<main>
 		{@render children()}
@@ -52,7 +57,6 @@
 		left: 1rem;
 		width: var(--nav-open-width);
 		height: calc(100% - 2rem);
-		padding: 1.5rem 1rem;
 		background: var(--nav);
 		border-radius: 1rem;
 		transition: all 0.3s ease-in-out;
@@ -76,14 +80,22 @@
 	nav ul {
 		list-style: none;
 		padding: 0;
-		margin: 2rem 0 0 0;
+		margin: var(--gap);
+		margin-top: var(--nav-closed-width);
 		flex-grow: 1;
 		display: flex;
 		flex-direction: column;
+		gap: var(--gap);
 	}
 
-	nav li {
-		margin-bottom: 1.5rem;
+	nav > ul ul {
+		margin: 0;
+		margin-top: var(--gap);
+		margin-left: var(--gap);
+	}
+
+	nav li:last-child {
+		margin-top: auto;
 	}
 
 	nav a,
@@ -109,7 +121,7 @@
 
 	.menu-button {
 		position: absolute;
-		width: var(--nav-closed-width);
+		width: 100%;
 		height: var(--nav-closed-width);
 		top: 0;
 		left: 50%;
@@ -126,50 +138,89 @@
 		z-index: 100;
 	}
 
-	.hamburger-icon,
-	.hamburger-icon::before,
-	.hamburger-icon::after {
-		content: '';
-		display: block;
-		background-color: var(--accent-text);
-		height: 0.1875rem; /* 3px -&gt; 0.1875rem */
-		width: 1.5rem; /* 24px -&gt; 1.5rem */
-		border-radius: 0.125rem; /* 2px -&gt; 0.125rem */
-		transition:
-			transform 0.3s ease-in-out,
-			background-color 0.3s ease-in-out;
+	.hamburger-icon {
+		--bar-height: 0.1875rem;
+		--gap: calc(var(--bar-height) * 2);
+		--spacing: calc(var(--gap) + var(--bar-height));
+
 		position: relative;
 	}
 
-	.hamburger-icon::before {
-		transform: translateY(-0.5rem); /* -8px -&gt; -0.5rem */
+	.hamburger-icon,
+	.hamburger-icon::before,
+	.hamburger-icon::after {
+		background-color: var(--accent-text);
+		height: var(--bar-height);
+		width: 1.5rem;
+		border-radius: 0.125rem;
+		transition:
+			transform 0.3s ease-in-out,
+			background-color 0.1s ease-in-out;
 	}
 
+	.hamburger-icon::before,
 	.hamburger-icon::after {
-		transform: translateY(0.3125rem); /* 5px -&gt; 0.3125rem */
+		content: '';
+		position: absolute;
+		left: 0;
+	}
+	.hamburger-icon::before {
+		transform: translateY(calc(-1 * var(--spacing)));
+	}
+	.hamburger-icon::after {
+		transform: translateY(var(--spacing));
 	}
 
 	.layout.open .hamburger-icon {
 		background-color: transparent;
 	}
-
 	.layout.open .hamburger-icon::before {
 		transform: rotate(45deg);
 	}
-
 	.layout.open .hamburger-icon::after {
-		transform: translateY(-0.1875rem) rotate(-45deg); /* Adjusted for alignment */
+		transform: rotate(-45deg);
+	}
+
+	.layout {
+		display: grid;
+		grid-template:
+			'header' var(--nav-closed-width)
+			'main' auto / auto;
+		min-height: 100vh;
+		padding: var(--gap);
+		gap: var(--gap);
+		overflow: hidden;
+	}
+
+	header {
+		grid-area: header;
+		margin-left: calc(var(--nav-closed-width) + var(--gap));
+
+		display: flex;
+		align-items: center;
+	}
+
+	header h1 {
+		font-size: 1.5rem;
 	}
 
 	main {
-		transition: margin-left 0.3s ease-in-out;
+		grid-area: main;
 		overflow: auto;
+		/* transition: margin-left 0.3s ease-in-out;
+		
 		margin: 1rem;
-		margin-left: calc(var(--nav-closed-width) + 2rem);
-		min-height: calc(100vh - 2rem);
+		margin-top: calc(var(--nav-closed-width) + 2rem);
+		 */
 	}
 
+	header,
+	main {
+		transition: margin-left 0.3s ease-in-out;
+	}
+
+	.layout.open header,
 	.layout.open main {
-		margin-left: calc(var(--nav-open-width) + 2rem);
+		margin-left: calc(var(--nav-open-width) + var(--gap));
 	}
 </style>

@@ -24,6 +24,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 					email: 1,
 					roles: 1
 				}
+			},
+			{
+				$sort: { name: 1 }
 			}
 		])
 		.toArray();

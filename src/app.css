@@ -10,8 +10,11 @@
 	--accent-text: #fff;
 
 	--nav: #00643a;
-	--nav-closed-width: 3.5rem; /* 56px */
-	--nav-open-width: 12.5rem; /* 200px */
+	
+	--gap: 1rem;
+	--radius: 0.5rem;
+	--nav-closed-width: 3rem;
+	--nav-open-width: 12.5rem;
 
 	--red: #b00020;
 	--red-text: white;
@@ -54,24 +57,58 @@ button,
 input,
 select,
 textarea {
-	font-size: .7em;
+	font-size: 0.875rem;
 	font-family: inherit;
+	font-weight: 600;
 	color: var(--text);
 	background: var(--light);
 	border: none;
 	border-radius: .5em;
-	padding: 1em;
+	padding: 0.75em;
 	cursor: pointer;
-
-	&:disabled {
-		filter: contrast(0.8);
-		opacity: 0.8;
-	}
 
 	/* &:not([disabled]):active {
 		filter: contrast(0.6);
 		transform: translate(0, 1px);
 	} */
+}
+
+:disabled {
+	filter: contrast(0.8);
+	opacity: 0.8;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0;
+	font-weight: 600;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	overflow-x: auto;
+}
+
+th, td {
+	padding: 0.5rem;
+	text-align: left;
+	border-bottom: 1px solid var(--light);
+}
+
+th {
+	background-color: var(--light-2);
+	font-weight: 600;
+}
+
+tr:hover {
+	background-color: var(--light);
+}
+
+.card {
+	background: var(--light);
+	border-radius: var(--radius);
+	padding: var(--gap);
+	margin-bottom: var(--gap);
 }
 
 .accent {

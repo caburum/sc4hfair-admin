@@ -16,9 +16,9 @@
 			.map(([role]) => [role as Role, isPermitted(data.user!.roles, [role as Role])])
 	);
 
-	const myMaxRole = data.user!.roles.reduce((max, role) => {
-		return availableRoles.get(role) ? role : max;
-	}, '' as Role);
+	const myMaxRole = data.user!.roles.reduce<Role | null>((max, role) => {
+		return ROLES[role] > ((max && ROLES[max]) ?? -Infinity) ? role : max;
+	}, null);
 
 	function handleRoleChange(user: DbUser, role: Role, checked: boolean) {
 		if (
@@ -80,22 +80,22 @@
 <ul>
 	<li>live: access to realtime fair operational tools (like notifications)</li>
 	<li>data: access to data management tools</li>
-	<li>admin: access to all of the above</li>
+	<li>admin: access to all of the above, with user management</li>
 	<li>dev: access to all of the above, with advanced development/debugging tools</li>
 </ul>
 
 {#if getAllChanges().length > 0}
-	<section class="change-summary">
+	<section class="card change-summary">
 		<h2>pending changes</h2>
-		<div>
+		<ul>
 			{#each getAllChanges() as change}
-				<div>
-					<strong>{change.user.name} &lt;{change.user.email}&gt;</strong>:
+				<li>
+					{change.user.name} &lt;{change.user.email}&gt;:
 					<span class="action {change.action}">{change.action}</span>
-					role <strong>{change.role}</strong>
-				</div>
+					role {change.role}
+				</li>
 			{/each}
-		</div>
+		</ul>
 		<div class="change-actions">
 			<form
 				action="?/apply"
@@ -112,9 +112,9 @@
 					};
 				}}
 			>
-				<button class="button yellow" type="submit">Apply Changes</button>
+				<button class="button yellow" type="submit">apply</button>
 			</form>
-			<button class="button grey" onclick={() => roleChanges.clear()}>Clear Changes</button>
+			<button class="button grey" onclick={() => roleChanges.clear()}>clear</button>
 		</div>
 	</section>
 {/if}
@@ -130,8 +130,8 @@
 	<tbody>
 		{#each data.users as user}
 			<tr>
-				<td
-					>{user.name || 'N/A'}
+				<td>
+					<span title={user.id}>{user.name || user.id}</span>
 					<span class="current-roles">
 						{#if user.roles && user.roles.length > 0}
 							{#each user.roles as role}
@@ -141,18 +141,20 @@
 					</span></td
 				>
 				<td>{user.email || 'N/A'}</td>
-				<td class="role-checkboxes">
-					{#each availableRoles as [role, permitted]}
-						<label class="role-checkbox">
-							<input
-								type="checkbox"
-								disabled={!permitted}
-								checked={isRoleChecked(user, role)}
-								onchange={(e) => handleRoleChange(user, role, e.currentTarget.checked)}
-							/>
-							{role}
-						</label>
-					{/each}
+				<td>
+					<div class="role-checkboxes">
+						{#each availableRoles as [role, permitted]}
+							<label class="role-checkbox">
+								<input
+									type="checkbox"
+									disabled={!permitted}
+									checked={isRoleChecked(user, role)}
+									onchange={(e) => handleRoleChange(user, role, e.currentTarget.checked)}
+								/>
+								{role}
+							</label>
+						{/each}
+					</div>
 				</td>
 			</tr>
 		{/each}
@@ -163,28 +165,6 @@
 	.table-container {
 		overflow-x: auto;
 		margin-bottom: 2rem;
-	}
-
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		overflow-x: auto;
-	}
-
-	th,
-	td {
-		padding: 0.5rem;
-		text-align: left;
-		border-bottom: 1px solid var(--light);
-	}
-
-	th {
-		background-color: var(--light-2);
-		font-weight: 600;
-	}
-
-	tr:hover {
-		background-color: var(--light);
 	}
 
 	.current-roles {
@@ -209,7 +189,7 @@
 	.role-checkbox {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.25rem;
 		cursor: pointer;
 		font-size: 0.875rem;
 	}
@@ -221,13 +201,6 @@
 	.role-checkbox:has([disabled]) {
 		opacity: 0.5;
 		cursor: not-allowed;
-	}
-
-	.change-summary {
-		background: var(--light);
-		border-radius: 8px;
-		padding: 1.5rem;
-		margin-bottom: 2rem;
 	}
 
 	.change-summary h2 {
