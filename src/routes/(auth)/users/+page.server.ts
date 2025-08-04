@@ -60,7 +60,9 @@ export const actions = {
 
 		let status = true;
 		if (bulkOps.length > 0) {
-			const { ok } = await db.collection('users').bulkWrite(bulkOps as any);
+			const { ok } = await db()
+				.collection('users')
+				.bulkWrite(bulkOps as any);
 			status = Boolean(ok);
 		}
 
