@@ -102,7 +102,7 @@ export async function getEntries<T extends FullEntry>(query: {
 		);
 
 		if (status !== 200) {
-			throw new Error(`Failed to fetch entries: ${status} ${JSON.stringify(data)}`);
+			throw new Error(`failed to fetch entries: ${status} ${JSON.stringify(data)}`);
 		}
 
 		items.push(...(data?.items ?? []));
@@ -124,7 +124,11 @@ export async function archiveEntry(id: string, version: number) {
 	await fetchContentful(`entries/${id}/archived`, { method: 'PUT', version });
 }
 
-export async function setWebhookActive(active: boolean, webhookId: string = VERCEL_WEBHOOK_ID) {
+export async function setWebhookActive(
+	active: boolean,
+	webhookId: string,
+	log: Logger = console.log
+) {
 	const url = `https://api.contentful.com/spaces/${SPACE_ID}/webhook_definitions/${webhookId}`;
 
 	const getRes = await fetch(url, {
@@ -163,6 +167,8 @@ export async function setWebhookActive(active: boolean, webhookId: string = VERC
 		throw new Error(`failed to put webhook ${webhookId}: ${JSON.stringify(error)}`);
 	}
 
+	log(`webhook ${webhookId} active status changed from ${previousActive} to ${active}`);
+
 	return { previousActive, webhookUrl };
 }
 
@@ -185,7 +191,11 @@ interface BulkActionResponse {
 
 type BulkAction = 'publish' | 'unpublish';
 
-export async function bulkAction(bulkPayload: BulkActionPayload[], action: BulkAction) {
+export async function bulkAction(
+	bulkPayload: BulkActionPayload[],
+	action: BulkAction,
+	log: Logger = console.log
+) {
 	if (bulkPayload.length === 0) return false;
 
 	// chunk into batches of 200
@@ -196,7 +206,7 @@ export async function bulkAction(bulkPayload: BulkActionPayload[], action: BulkA
 	}, [] as BulkActionPayload[][]);
 
 	if (chunks.length > 1) {
-		console.warn(`bulkAction: chunking payload into ${chunks.length} batches of ${chunkSize}`);
+		log(`bulkAction: chunking payload into ${chunks.length} batches of ${chunkSize}`);
 	}
 
 	return Promise.all(
@@ -216,14 +226,12 @@ export async function bulkAction(bulkPayload: BulkActionPayload[], action: BulkA
 
 			if (!bulkResponse.ok) {
 				const error = await bulkResponse.json();
-				throw new Error(`bulk ${action} failed: ${JSON.stringify(error)}`);
+				log(`bulk ${action} failed`, error);
 			}
 
 			const bulkResult: BulkActionResponse = await bulkResponse.json();
-			console.log(
-				`waiting on bulk ${action}... status`,
-				bulkResponse.status,
-				bulkResult.sys.status,
+			log(
+				`waiting on bulk ${action}... status ${bulkResponse.status} ${bulkResult.sys.status}`,
 				bulkResult
 			);
 
@@ -245,13 +253,13 @@ export async function bulkAction(bulkPayload: BulkActionPayload[], action: BulkA
 
 				const statusResult: BulkActionResponse = await statusResponse.json();
 				const status = statusResult.sys.status;
-				console.log(`Waiting on bulk ${action}... status`, status);
+				log(`waiting on bulk ${action}... status ${status}`);
 
 				if (status === 'succeeded') {
 					return statusResult;
 				} else if (status === 'failed') {
-					console.error(statusResult.error);
-					throw new Error(`Bulk ${action} failed: ${JSON.stringify(statusResult.error)}`);
+					log(`bulk ${action} failed`, statusResult.error);
+					// throw new Error(`Bulk ${action} failed: ${JSON.stringify(statusResult.error)}`);
 				}
 			}
 		})
@@ -262,17 +270,21 @@ export async function bulkAction(bulkPayload: BulkActionPayload[], action: BulkA
 export async function conditionalBulkAction(
 	bulkPayload: BulkActionPayload[],
 	action: BulkAction,
-	noPublish: boolean = false
+	noPublish: boolean = false,
+	log: Logger = console.log
 ) {
-	if (noPublish || bulkPayload.length === 0) return;
+	if (noPublish || bulkPayload.length === 0) {
+		log(`taking no publish action for ${bulkPayload.length} entries`);
+		return;
+	}
 
-	const { previousActive, webhookUrl } = await setWebhookActive(false);
+	const { previousActive, webhookUrl } = await setWebhookActive(false, VERCEL_WEBHOOK_ID, log);
 
 	try {
-		await bulkAction(bulkPayload, action);
+		await bulkAction(bulkPayload, action, log);
 	} finally {
 		if (previousActive) {
-			await setWebhookActive(true); // re-enable
+			await setWebhookActive(true, VERCEL_WEBHOOK_ID, log); // re-enable
 
 			// manually trigger webhook
 			try {

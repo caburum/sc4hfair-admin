@@ -1,15 +1,16 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
+// this can't be dynamically generated, but this MUST be kept in sync with the schema files
 const PREFIX = '/src/lib/schemas';
-const schemaFiles = import.meta.glob<Schema>('/src/lib/schemas/*.json', {
+const schemaFiles = import.meta.glob<string>('/src/lib/schemas/*.json', {
+	query: '?raw', // so they can be served without reformatting
 	import: 'default',
 	eager: false
 });
 
-console.trace('Schema files loaded:', Object.keys(schemaFiles));
-
 export interface Schema {
+	$id?: string;
 	[key: string]: any;
 }
 
@@ -25,10 +26,10 @@ const ajv = new Ajv({ allErrors: true, validateFormats: true });
 addFormats(ajv);
 
 export const validateSchema = async (schema: string, data: any) => {
-	const schemaData = await getSchema(schema);
+	const schemaData = JSON.parse(await getSchema(schema)) as Schema;
 
-	const validate = ajv.compile(schemaData);
-	const valid = validate(data);
+	const validate = (schemaData?.$id && ajv.getSchema(schemaData?.$id)) || ajv.compile(schemaData);
+	const valid = Boolean(await validate(data));
 
 	return {
 		valid,

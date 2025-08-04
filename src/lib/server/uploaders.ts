@@ -18,11 +18,16 @@ export type UploaderResult = {
 	errors: Record<string, any>[];
 };
 
-type UploaderFunc<T = Record<string, any>> = (data: T[], dry: boolean) => Promise<UploaderResult>;
+type UploaderFunc<T = Record<string, any>> = (
+	data: T[],
+	dry: boolean,
+	completeDataset: boolean,
+	log: Logger
+) => Promise<UploaderResult>;
 
 /** each uploader must be matched with a schema in $lib/schemas */
 export const uploaders = {
-	schedule: async (data, dry) => {
+	schedule: async (data, dry, completeDataset, log = console.log) => {
 		const CONTENT_TYPE_ID = 'scheduledEvent';
 		const tempEvents: Record<
 			string,
@@ -73,6 +78,7 @@ export const uploaders = {
 				});
 			tempEvents[id] = { entry };
 		}
+		log(`provided ${Object.keys(tempEvents).length} events to process`);
 
 		const publishPayload: BulkActionPayload[] = [];
 
@@ -110,7 +116,10 @@ export const uploaders = {
 			'sys.archivedAt[exists]': false,
 			'limit': 1000
 		});
+		log(`found ${entries.length} existing events to compare against`);
 
+		log(`please wait, processing events...`);
+		let unaffected = 0;
 		for (const entry of entries) {
 			const { id, version } = entry.sys;
 
@@ -120,20 +129,26 @@ export const uploaders = {
 				await doEvent(id);
 				result.updated.push(id);
 				delete tempEvents[id]; // remove it from the tempEvents to avoid creating it later
-			} else {
+			} else if (completeDataset) {
 				// otherwise, archive it
 				if (!dry) await archiveEntry(id, version);
 				result.archived.push(id);
+			} else {
+				unaffected++;
 			}
 		}
+		log(`archiving ${result.archived.length} unmatched events`);
+		log(`not affecting ${unaffected} unmatched events`);
+		log(`updating ${result.updated.length} matched events`);
 
 		for (const id of Object.keys(tempEvents)) {
 			// create the rest that we aren't modifying
 			await doEvent(id);
 			result.created.push(id);
 		}
+		log(`creating ${result.created.length} new events`);
 
-		await conditionalBulkAction(publishPayload, 'publish', dry);
+		await conditionalBulkAction(publishPayload, 'publish', dry, log);
 
 		return result;
 	}

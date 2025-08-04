@@ -18,6 +18,8 @@ declare global {
 	}
 
 	type Require<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+
+	type Logger = (message: string, ...data: any[]) => void;
 }
 
 declare module '$env/static/private' {

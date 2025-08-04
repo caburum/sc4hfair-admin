@@ -15,41 +15,31 @@
 		log = $state<Log[]>([]),
 		result = $state<Result | null>(null),
 		nextStage: Result['nextStage'] = $derived(result?.nextStage || 'validate');
-
-	$inspect(log);
-
-	let schema = $state<SchemaUploaderId | undefined>(),
-		json = $state<string | undefined>(),
-		checkbox = $state(false),
-		confirmed = $derived(nextStage !== 'import' || checkbox);
-
-	onMount(() => {
-		// reset any previous state
+	const revalidate = () => {
 		result = null;
 		nextStage = 'validate';
 		checkbox = false;
-	});
+		log = [];
+	};
 
-	async function handleSubmit(
-		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
-	) {
+	let schema = $state<SchemaUploaderId | undefined>(),
+		json = $state<string | undefined>(),
+		dataset = $state('complete'),
+		checkbox = $state(false),
+		confirmed = $derived(nextStage !== 'import' || checkbox);
+
+	onMount(revalidate);
+
+	async function onsubmit(event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }) {
 		event.preventDefault();
-		console.log(event);
 
 		loading = true;
+		log = []; // reset log
 
-		const data = new FormData(event.currentTarget);
+		const data = new FormData(event.currentTarget),
+			wasImport = nextStage === 'import'; // if this succeeds, 🎉
 
-		// const response = await fetch(event.currentTarget.action, {
-		// 	method: 'POST',
-		// 	body: data
-		// });
-
-		// source();
-
-		// console.log(await response.text());
-
-		let unsubscribe: (() => void)[] = [];
+		let unsubscribes: (() => void)[] = [];
 
 		const connection = source(event.currentTarget.action, {
 			cache: false,
@@ -59,17 +49,22 @@
 				openWhenHidden: true
 			},
 			open: (event) => {
-				console.log('Connection opened.', event);
+				console.log('sse connection opened', event);
 			},
 			close: (event) => {
-				console.log('Connection closed.', event);
+				console.log('sse connection closed', event);
 				loading = false;
-				unsubscribe.forEach((fn) => fn());
+				if (wasImport) confetti.fire();
+				unsubscribes.forEach((fn) => fn());
+			},
+			error: ({ error }) => {
+				log.push({
+					message: `error during sse connection: ${error}`
+				});
 			}
 		});
 
-		log = []; // reset log
-		unsubscribe.push(
+		unsubscribes.push(
 			connection
 				.select('log')
 				.json<Log>()
@@ -77,17 +72,10 @@
 			connection
 				.select('result')
 				.json<Result>()
-				.subscribe((data) => (result = data))
+				.subscribe((data) => {
+					result = data;
+				})
 		);
-
-		// const result: ActionResult = deserialize(await response.text());
-
-		// if (result.type === 'success') {
-		// 	// rerun all `load` functions, following the successful update
-		// 	await invalidateAll();
-		// }
-
-		// applyAction(result);
 	}
 </script>
 
@@ -95,17 +83,7 @@
 
 <h1>data import</h1>
 
-<form class="card" method="post" bind:this={formElement} onsubmit={handleSubmit}>
-	<!-- use:enhance={({ formElement, formData, action, cancel }) => {
-		loading = true;
-		let isImport = nextStage === 'import';
-		return async ({ result }) => {
-			await applyAction(result);
-			loading = false;
-			if (isImport) confetti.fire();
-		};
-	}}
-> -->
+<form class="card" method="post" bind:this={formElement} {onsubmit}>
 	<div>
 		type:
 		{#each ['schedule'] as s}
@@ -143,14 +121,37 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 			</li>
 			<li>once the output is satisfactory, click verify to preview the changes</li>
 			<li>once that is satisfactory, click import to add the data to the app</li>
-			<li>todo: publish</li>
+			<li>todo: publish, maybe redirect to status pages with deploy button if not automatic</li>
 		</ol>
 	{/if}
 
 	{#if schema}
 		<!-- todo: better ui -->
-		<textarea rows="10" name="json" bind:value={json} oninput={() => (nextStage = 'validate')}
-		></textarea>
+		<textarea rows="10" name="json" bind:value={json} oninput={revalidate}></textarea>
+
+		<div>
+			<label>
+				<input
+					type="radio"
+					name="dataset"
+					bind:group={dataset}
+					value="complete"
+					onchange={revalidate}
+				/>
+				this is the <strong>complete</strong> dataset, archive any items not included
+			</label>
+			<br />
+			<label>
+				<input
+					type="radio"
+					name="dataset"
+					bind:group={dataset}
+					value="partial"
+					onchange={revalidate}
+				/>
+				this is a <strong>partial</strong> dataset, only add/update the included items
+			</label>
+		</div>
 
 		{#if !confirmed}
 			<p>please acknowledge the effects before proceeding (scroll down)</p>
@@ -158,12 +159,7 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 			<p>this may take over a minute to complete</p>
 		{/if}
 
-		{#each log as entry}
-			<pre>{JSON.stringify(entry)}</pre>
-		{/each}
-
 		<input type="hidden" name="stage" value={nextStage} />
-
 		<div class="buttons">
 			<button disabled={!confirmed || loading} type="submit">{nextStage}</button>
 			<Spinner {loading} />
@@ -171,9 +167,18 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 	{/if}
 </form>
 
+{#if log.length}
+	<h2>log</h2>
+	<ul>
+		{#each log as entry}
+			<li><code>[{entry.ts}]</code> {entry.message}</li>
+		{/each}
+	</ul>
+{/if}
+
 {#if result?.valid === false || result?.errors.length}
 	<h2>errors</h2>
-	<p>please ask your ai to fix these validation errors</p>
+	<p>please ask your ai about these errors</p>
 	<CopyPre>"errors": {JSON.stringify(result.errors, null, '\t')}</CopyPre>
 {:else if result?.nextStage === 'import' && result?.valid && json && Array.isArray(JSON.parse(json))}
 	<h2>preview</h2>
@@ -217,3 +222,10 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 {/if}
 
 <DebugInfo data={{ result, log }} />
+
+<style>
+	ul {
+		list-style: none;
+		padding: 0;
+	}
+</style>
