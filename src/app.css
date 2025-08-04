@@ -144,6 +144,13 @@ tr:hover {
 	background: var(--light-2);
 }
 
+.card .buttons {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--gap);
+}
+
 .accent {
 	background-color: var(--accent);
 	color: var(--accent-text);

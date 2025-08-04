@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
+	import Spinner from '$lib/assets/Spinner.svelte';
 	import CopyPre from '$lib/components/CopyPre.svelte';
 	import DebugInfo from '$lib/components/DebugInfo.svelte';
 	import { type SchemaUploaderId } from '$lib/server/uploaders.js';
@@ -9,6 +10,7 @@
 	let { form } = $props();
 
 	let formElement: HTMLFormElement,
+		loading = $state(false),
 		nextStage: import('./+page.server.js').ActionResult['nextStage'] = $derived(
 			form?.nextStage || 'validate'
 		),
@@ -32,8 +34,10 @@
 	method="post"
 	bind:this={formElement}
 	use:enhance={({ formElement, formData, action, cancel }) => {
+		loading = true;
 		return async ({ result }) => {
 			await applyAction(result);
+			loading = false;
 		};
 	}}
 >
@@ -88,7 +92,11 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 		{/if}
 
 		<input type="hidden" name="stage" value={nextStage} />
-		<button disabled={!confirmed} type="submit">{nextStage}</button>
+
+		<div class="buttons">
+			<button disabled={!confirmed || loading} type="submit">{nextStage}</button>
+			<Spinner {loading} />
+		</div>
 	{/if}
 </form>
 
