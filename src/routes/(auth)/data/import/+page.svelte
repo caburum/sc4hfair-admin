@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { applyAction, enhance } from '$app/forms';
 	import Spinner from '$lib/assets/Spinner.svelte';
 	import Confetti from '$lib/components/Confetti.svelte';
 	import CopyPre from '$lib/components/CopyPre.svelte';
@@ -7,37 +6,97 @@
 	import { type SchemaUploaderId } from '$lib/server/uploaders.js';
 	import { onMount } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
+	import { source } from 'sveltekit-sse';
+	import type { Log, Result } from './+server.js';
 
-	let { form } = $props();
+	let formElement: HTMLFormElement, confetti: Confetti;
 
-	let formElement: HTMLFormElement,
-		confetti: Confetti,
-		loading = $state(false),
-		nextStage: import('./+page.server.js').ActionResult['nextStage'] = $derived(
-			form?.nextStage || 'validate'
-		),
-		schema: SchemaUploaderId | undefined = $state(),
-		json: string | undefined = $state(),
-		checkbox: boolean = $state(false),
-		confirmed: boolean = $derived(nextStage !== 'import' || checkbox);
+	let loading = $state(false),
+		log = $state<Log[]>([]),
+		result = $state<Result | null>(null),
+		nextStage: Result['nextStage'] = $derived(result?.nextStage || 'validate');
+
+	$inspect(log);
+
+	let schema = $state<SchemaUploaderId | undefined>(),
+		json = $state<string | undefined>(),
+		checkbox = $state(false),
+		confirmed = $derived(nextStage !== 'import' || checkbox);
 
 	onMount(() => {
 		// reset any previous state
-		form = null;
+		result = null;
 		nextStage = 'validate';
 		checkbox = false;
 	});
+
+	async function handleSubmit(
+		event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement }
+	) {
+		event.preventDefault();
+		console.log(event);
+
+		loading = true;
+
+		const data = new FormData(event.currentTarget);
+
+		// const response = await fetch(event.currentTarget.action, {
+		// 	method: 'POST',
+		// 	body: data
+		// });
+
+		// source();
+
+		// console.log(await response.text());
+
+		let unsubscribe: (() => void)[] = [];
+
+		const connection = source(event.currentTarget.action, {
+			cache: false,
+			options: {
+				method: 'POST',
+				body: data,
+				openWhenHidden: true
+			},
+			open: (event) => {
+				console.log('Connection opened.', event);
+			},
+			close: (event) => {
+				console.log('Connection closed.', event);
+				loading = false;
+				unsubscribe.forEach((fn) => fn());
+			}
+		});
+
+		log = []; // reset log
+		unsubscribe.push(
+			connection
+				.select('log')
+				.json<Log>()
+				.subscribe((data) => data && log.push(data)),
+			connection
+				.select('result')
+				.json<Result>()
+				.subscribe((data) => (result = data))
+		);
+
+		// const result: ActionResult = deserialize(await response.text());
+
+		// if (result.type === 'success') {
+		// 	// rerun all `load` functions, following the successful update
+		// 	await invalidateAll();
+		// }
+
+		// applyAction(result);
+	}
 </script>
 
 <Confetti bind:this={confetti} />
 
 <h1>data import</h1>
 
-<form
-	class="card"
-	method="post"
-	bind:this={formElement}
-	use:enhance={({ formElement, formData, action, cancel }) => {
+<form class="card" method="post" bind:this={formElement} onsubmit={handleSubmit}>
+	<!-- use:enhance={({ formElement, formData, action, cancel }) => {
 		loading = true;
 		let isImport = nextStage === 'import';
 		return async ({ result }) => {
@@ -46,7 +105,7 @@
 			if (isImport) confetti.fire();
 		};
 	}}
->
+> -->
 	<div>
 		type:
 		{#each ['schedule'] as s}
@@ -99,6 +158,10 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 			<p>this may take over a minute to complete</p>
 		{/if}
 
+		{#each log as entry}
+			<pre>{JSON.stringify(entry)}</pre>
+		{/each}
+
 		<input type="hidden" name="stage" value={nextStage} />
 
 		<div class="buttons">
@@ -108,11 +171,11 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 	{/if}
 </form>
 
-{#if form?.valid === false || form?.errors.length}
+{#if result?.valid === false || result?.errors.length}
 	<h2>errors</h2>
 	<p>please ask your ai to fix these validation errors</p>
-	<CopyPre>"errors": {JSON.stringify(form.errors, null, '\t')}</CopyPre>
-{:else if form?.nextStage === 'import' && form?.valid && json && Array.isArray(JSON.parse(json))}
+	<CopyPre>"errors": {JSON.stringify(result.errors, null, '\t')}</CopyPre>
+{:else if result?.nextStage === 'import' && result?.valid && json && Array.isArray(JSON.parse(json))}
 	<h2>preview</h2>
 	{@const parsedJson = JSON.parse(json) as any[]}
 	{@const keys = parsedJson.reduce((acc, item) => {
@@ -143,9 +206,9 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 	</table>
 	<p>
 		this will
-		<strong style="color: var(--green)">create {form?.created.length}</strong>,
-		<strong style="color: var(--yellow)">update {form?.updated.length}</strong>, and
-		<strong style="color: var(--red)">archive {form?.archived.length}</strong> items.
+		<strong style="color: var(--green)">create {result?.created?.length}</strong>,
+		<strong style="color: var(--yellow)">update {result?.updated?.length}</strong>, and
+		<strong style="color: var(--red)">archive {result?.archived?.length}</strong> items.
 	</p>
 	<label>
 		<input type="checkbox" bind:checked={checkbox} />
@@ -153,4 +216,4 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 	</label>
 {/if}
 
-<DebugInfo data={form} />
+<DebugInfo data={{ result, log }} />

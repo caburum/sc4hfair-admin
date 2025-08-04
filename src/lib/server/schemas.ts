@@ -1,17 +1,20 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
-const schemaFiles = import.meta.glob<Schema>('./schemas/*.json', {
+const PREFIX = '/src/lib/schemas';
+const schemaFiles = import.meta.glob<Schema>('/src/lib/schemas/*.json', {
 	import: 'default',
 	eager: false
 });
+
+console.trace('Schema files loaded:', Object.keys(schemaFiles));
 
 export interface Schema {
 	[key: string]: any;
 }
 
 export const getSchema = async (schema: string) => {
-	const filePath = `./schemas/${schema}.json`;
+	const filePath = `${PREFIX}/${schema}.json`;
 	if (schemaFiles[filePath]) {
 		return await schemaFiles[filePath]();
 	}

@@ -20,4 +20,10 @@ declare global {
 	type Require<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 }
 
+declare module '$env/static/private' {
+	export const VERCEL_GIT_COMMIT_REF: string | undefined;
+	export const VERCEL_GIT_COMMIT_SHA: string | undefined;
+	export const VERCEL_DEPLOYMENT_ID: string | undefined;
+}
+
 export {};

@@ -96,6 +96,10 @@ form {
 	flex-direction: column;
 	gap: var(--gap);
 }
+form > * {
+	/* let flex handle the space between elements */
+	margin: 0;
+}
 
 pre {
 	white-space: pre-wrap;

@@ -14,7 +14,7 @@
 		"lint": "prettier --check ."
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/adapter-vercel": "^5.8.1",
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
 		"prettier": "^3.4.2",
@@ -28,6 +28,7 @@
 		"ajv": "^8.17.1",
 		"ajv-formats": "^3.0.1",
 		"jose": "^6.0.12",
-		"mongodb": "^6.18.0"
+		"mongodb": "^6.18.0",
+		"sveltekit-sse": "^0.14.3"
 	}
 }
