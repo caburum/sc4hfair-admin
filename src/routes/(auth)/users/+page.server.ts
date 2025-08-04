@@ -3,14 +3,13 @@ import { db } from '$lib/db';
 import { authenticate } from '$lib/server/auth';
 import { fail } from '@sveltejs/kit';
 import { ObjectId, type UpdateFilter } from 'mongodb';
-import type { Actions, PageServerLoad } from './$types';
 
 export type DbUser = { id: string; name?: string; email?: string; roles?: string[] };
 export type Change = { user: DbUser; role: Role; action: 'add' | 'remove' };
 
 const level: Role[] = ['admin']; // in future, could allow lower roles access to promote others
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load = async ({ locals }) => {
 	authenticate(locals.user, level);
 
 	const users = await db
@@ -34,7 +33,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return { users };
 };
 
-export const actions: Actions = {
+export const actions = {
 	apply: async ({ locals, request }) => {
 		authenticate(locals.user, level);
 

@@ -3,10 +3,9 @@
 	import { invalidateAll } from '$app/navigation';
 	import { isPermitted, ROLES, type Role } from '$lib/auth';
 	import { SvelteMap } from 'svelte/reactivity';
-	import type { PageProps } from './$types';
 	import type { Change, DbUser } from './+page.server';
 
-	let { data }: PageProps = $props();
+	let { data } = $props();
 
 	let roleChanges: Map<string, Change[]> = new SvelteMap();
 

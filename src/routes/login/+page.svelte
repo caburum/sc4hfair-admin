@@ -1,9 +1,5 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
-
-	let { data }: PageProps = $props();
-
-	const AUTH_BASE = 'https://sc4hfair.app/';
+	import { AUTH_BASE } from '$lib/auth.js';
 
 	async function login(provider: 'google') {
 		location.href = `${AUTH_BASE}/api/auth/${provider}-init?redirect=${encodeURIComponent(globalThis.location.origin)}`;

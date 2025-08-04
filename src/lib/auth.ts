@@ -37,3 +37,5 @@ export function isPermitted(userRoles: User['roles'], targetRoles: User['roles']
 		return highestValue > requiredRoleValue || userRoles.includes(role);
 	});
 }
+
+export const AUTH_BASE = 'https://sc4hfair.app/';

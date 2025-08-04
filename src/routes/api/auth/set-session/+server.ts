@@ -1,8 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import { decodeJwt } from 'jose';
-import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ cookies, url }) => {
+export const GET = async ({ cookies, url }) => {
 	const final_redirect = url.searchParams.get('redirect');
 	const session_token = url.searchParams.get('token');
 

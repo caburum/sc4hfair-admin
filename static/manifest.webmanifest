@@ -1,6 +1,6 @@
 {
 	"name": "SC 4H Fair Admin Tools",
-	"short_name": "SC 4H Fair Admin",
+	"short_name": "SC4HF Admin",
 	"start_url": "/",
 	"related_applications": [
 		{ "platform": "webapp", "url": "https://admin.sc4hfair.app/manifest.webmanifest" }

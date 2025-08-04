@@ -1,0 +1,36 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://sc4hfair.app/schemas/schedule.json",
+	"title": "Event Schedule",
+	"description": "A schema defining an array of events.",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"title": {
+				"type": "string",
+				"description": "Human readable name of the event, properly capitalized."
+			},
+			"time": {
+				"type": "string",
+				"format": "date-time",
+				"description": "Start time of the event in ISO 8601 format. When importing, assume from US East Coast time zone (EDT) if not specified."
+			},
+			"end_time": {
+				"type": ["string", "null"],
+				"format": "date-time",
+				"description": "End time of the event in ISO 8601 format, if applicable."
+			},
+			"tent": {
+				"type": ["string", "null"],
+				"description": "The slug of the tent that this event is in, from a list of valid slugs. Null if unknown."
+			},
+			"near": {
+				"type": "boolean",
+				"description": "True if the event is 'near' the tent, false if it is 'in' the tent.",
+				"default": false
+			}
+		},
+		"required": ["title", "time", "tent"]
+	}
+}

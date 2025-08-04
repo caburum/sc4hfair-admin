@@ -11,6 +11,7 @@
 
 	--nav: #00643a;
 	
+	--transition-duration: 0.3s;
 	--gap: 1rem;
 	--radius: 0.5rem;
 	--nav-closed-width: 3rem;
@@ -53,24 +54,52 @@ body {
 	/* outline: 1px solid red; */
 }
 
+*:focus-visible {
+	outline: 2px solid var(--text-translucent);
+	outline-offset: 1px;
+}
+
 button,
+.button,
 input,
 select,
 textarea {
 	font-size: 0.875rem;
 	font-family: inherit;
 	font-weight: 600;
+	text-decoration: none;
 	color: var(--text);
 	background: var(--light);
 	border: none;
-	border-radius: .5em;
+	border-radius: var(--radius);
 	padding: 0.75em;
-	cursor: pointer;
+	display: inline-block;
+	width: fit-content;
 
 	/* &:not([disabled]):active {
 		filter: contrast(0.6);
 		transform: translate(0, 1px);
 	} */
+}
+
+button {
+	cursor: pointer;
+}
+
+textarea {
+	width: 100%;
+	resize: vertical;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap);
+}
+
+pre {
+	white-space: pre-wrap;
+	tab-size: 2ch;
 }
 
 :disabled {
@@ -109,6 +138,10 @@ tr:hover {
 	border-radius: var(--radius);
 	padding: var(--gap);
 	margin-bottom: var(--gap);
+}
+
+.card :where(button, input, select, textarea) {
+	background: var(--light-2);
 }
 
 .accent {

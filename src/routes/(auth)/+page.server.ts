@@ -1,8 +1,7 @@
 import { db } from '$lib/db';
 import { ObjectId } from 'mongodb';
-import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load = async ({ locals }) => {
 	const query = await db.collection('users').findOne<{
 		_id: ObjectId;
 		name: string;

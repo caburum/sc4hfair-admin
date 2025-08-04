@@ -16,6 +16,8 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	type Require<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 }
 
 export {};

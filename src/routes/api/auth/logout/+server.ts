@@ -1,7 +1,6 @@
 import { redirect } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ cookies, url }) => {
+export const POST = async ({ cookies, url }) => {
 	cookies.set('session_token', '', {
 		path: '/',
 		expires: new Date(0)

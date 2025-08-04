@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import Clover from '$lib/assets/Clover.svelte';
+	import { isPermitted } from '$lib/auth';
 	import { MediaQuery } from 'svelte/reactivity';
 	import '../app.css';
-	import type { LayoutProps } from './$types';
 
-	let { data, children }: LayoutProps = $props();
+	let { data, children } = $props();
 
-	let authenticated = $state(data.user !== null);
 	let route = $derived(
 		['sc4hfair-admin', ...page.url.pathname.split('/').slice(1)].filter(Boolean)
 	);
@@ -25,10 +24,20 @@
 			<div class="hamburger-icon"></div>
 		</button>
 		<ul>
-			{#if authenticated}
+			{#if data.user !== null}
 				<li><a href="/">info</a></li>
-				<li><a href="/users">users</a></li>
-				<li><a href="/data">data</a></li>
+				<!-- todo: centralize permissions by route -->
+				{#if isPermitted(data.user.roles, ['admin'])}
+					<li><a href="/users">users</a></li>
+				{/if}
+				{#if isPermitted(data.user.roles, ['data'])}
+					<li>
+						<a href="/data">data</a>
+						<ul>
+							<li><a href="/data/import">import</a></li>
+						</ul>
+					</li>
+				{/if}
 				<li>
 					<form action="/api/auth/logout" method="POST"><button type="submit">logout</button></form>
 				</li>
@@ -56,8 +65,6 @@
 
 <style>
 	.layout {
-		--transition-duration: 0.3s;
-
 		display: grid;
 		grid-template:
 			'header' var(--nav-closed-width)
@@ -116,6 +123,15 @@
 	main {
 		grid-area: main;
 		overflow: auto;
+
+		display: flex;
+		flex-direction: column;
+		gap: var(--gap);
+	}
+
+	main :global(> *) {
+		/* let flex handle the space between elements */
+		margin: 0;
 	}
 
 	/* navigation button & menu */
