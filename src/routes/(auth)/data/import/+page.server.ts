@@ -2,10 +2,6 @@ import { validateSchema } from '$lib/schemas.server';
 import { authenticate } from '$lib/server/auth';
 import { uploaders, type SchemaUploaderId, type UploaderResult } from '$lib/server/uploaders';
 
-export const load = async ({ locals }) => {
-	return {};
-};
-
 export interface ActionResult extends UploaderResult {
 	nextStage: 'validate' | 'import';
 	valid: boolean;
@@ -50,7 +46,7 @@ export const actions = {
 		const res = await uploaders[schema](json, dry);
 
 		return {
-			nextStage: 'import',
+			nextStage: stage === 'validate' ? 'import' : 'validate',
 			valid,
 			externalTime: Date.now() - start,
 			...res

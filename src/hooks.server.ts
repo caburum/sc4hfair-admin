@@ -1,4 +1,3 @@
-import { connect } from '$lib/db';
 import { validateSession } from '$lib/server/auth';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
@@ -21,11 +20,3 @@ const sessionHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handle = sequence(sessionHandle);
-
-connect()
-	.then(() => {
-		console.log('connected to database');
-	})
-	.catch((e) => {
-		console.error(e);
-	});

@@ -2,10 +2,6 @@ import { authenticate } from '$lib/server/auth';
 import { currentYear, lastYearTagId } from '$lib/server/commonData';
 import { bulkAction, fetchContentful, getEntries } from '$lib/server/contentful';
 
-export const load = async ({ locals }) => {
-	return {};
-};
-
 export const actions = {
 	// todo: add automatically if doesn't already exist
 	newYear: async ({ locals }) => {

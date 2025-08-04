@@ -3,6 +3,9 @@ import { MongoClient } from 'mongodb';
 
 const client = new MongoClient(MONGODB_URI);
 
+client.addListener('connectionPoolReady', () => console.log('db connectionPoolReady'));
+client.addListener('connectionReady', () => console.log('db connectionReady'));
+
 export async function connect(): Promise<void> {
 	await client.connect();
 }

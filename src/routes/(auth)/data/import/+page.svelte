@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms';
 	import Spinner from '$lib/assets/Spinner.svelte';
+	import Confetti from '$lib/components/Confetti.svelte';
 	import CopyPre from '$lib/components/CopyPre.svelte';
 	import DebugInfo from '$lib/components/DebugInfo.svelte';
 	import { type SchemaUploaderId } from '$lib/server/uploaders.js';
@@ -10,6 +11,7 @@
 	let { form } = $props();
 
 	let formElement: HTMLFormElement,
+		confetti: Confetti,
 		loading = $state(false),
 		nextStage: import('./+page.server.js').ActionResult['nextStage'] = $derived(
 			form?.nextStage || 'validate'
@@ -27,6 +29,8 @@
 	});
 </script>
 
+<Confetti bind:this={confetti} />
+
 <h1>data import</h1>
 
 <form
@@ -35,9 +39,11 @@
 	bind:this={formElement}
 	use:enhance={({ formElement, formData, action, cancel }) => {
 		loading = true;
+		let isImport = nextStage === 'import';
 		return async ({ result }) => {
 			await applyAction(result);
 			loading = false;
+			if (isImport) confetti.fire();
 		};
 	}}
 >
@@ -88,7 +94,9 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 		></textarea>
 
 		{#if !confirmed}
-			<p>please acknowledge the effects before proceeding</p>
+			<p>please acknowledge the effects before proceeding (scroll down)</p>
+		{:else if nextStage === 'import'}
+			<p>this may take over a minute to complete</p>
 		{/if}
 
 		<input type="hidden" name="stage" value={nextStage} />
@@ -100,11 +108,11 @@ near: boolean that is true if the event is "near" the tent, false if the event i
 	{/if}
 </form>
 
-{#if form?.valid === false && form?.errors.length}
+{#if form?.valid === false || form?.errors.length}
 	<h2>errors</h2>
 	<p>please ask your ai to fix these validation errors</p>
 	<CopyPre>"errors": {JSON.stringify(form.errors, null, '\t')}</CopyPre>
-{:else if form?.valid && json && Array.isArray(JSON.parse(json))}
+{:else if form?.nextStage === 'import' && form?.valid && json && Array.isArray(JSON.parse(json))}
 	<h2>preview</h2>
 	{@const parsedJson = JSON.parse(json) as any[]}
 	{@const keys = parsedJson.reduce((acc, item) => {
