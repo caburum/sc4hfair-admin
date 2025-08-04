@@ -1,5 +1,5 @@
+import { currentYear, lastYearTagId } from '$lib/commonData';
 import { authenticate } from '$lib/server/auth';
-import { currentYear, lastYearTagId } from '$lib/server/commonData';
 import { bulkAction, fetchContentful, getEntries } from '$lib/server/contentful';
 
 export const actions = {

@@ -1,4 +1,4 @@
-import { yearTagId } from './commonData';
+import { yearTagId } from '../commonData';
 import {
 	archiveEntry,
 	conditionalBulkAction,

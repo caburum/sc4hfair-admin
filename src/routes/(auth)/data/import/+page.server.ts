@@ -1,5 +1,5 @@
-import { validateSchema } from '$lib/schemas.server';
 import { authenticate } from '$lib/server/auth';
+import { validateSchema } from '$lib/server/schemas';
 import { uploaders, type SchemaUploaderId, type UploaderResult } from '$lib/server/uploaders';
 
 export interface ActionResult extends UploaderResult {

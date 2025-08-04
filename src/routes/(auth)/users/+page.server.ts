@@ -1,6 +1,6 @@
 import { isPermitted, type Role } from '$lib/auth';
-import { db } from '$lib/db';
 import { authenticate } from '$lib/server/auth';
+import { db } from '$lib/server/db';
 import { fail } from '@sveltejs/kit';
 import { ObjectId, type UpdateFilter } from 'mongodb';
 
@@ -12,7 +12,7 @@ const level: Role[] = ['admin']; // in future, could allow lower roles access to
 export const load = async ({ locals }) => {
 	authenticate(locals.user, level);
 
-	const users = await db
+	const users = await db()
 		.collection('users')
 		.aggregate<DbUser>([
 			{
