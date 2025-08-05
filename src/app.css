@@ -1,4 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono&display=swap');
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+/* @import 'tailwindcss/preflight.css' layer(base); */
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import '@layerstack/tailwind/core.css';
+@import '@layerstack/tailwind/utils.css';
+@import '@layerstack/tailwind/themes/basic.css';
+@source '../node_modules/layerchart/dist';
+
+.lc-root-container {
+	--color-primary: var(--accent);
+	--color-surface-100: var(--bg);
+	--color-surface-200: var(--light);
+	--color-surface-300: var(--light-2);
+	--color-surface-content: var(--text);
+
+	overflow: hidden;
+}
 
 :root {
 	--text: #eee;
@@ -10,7 +28,7 @@
 	--accent-text: #fff;
 
 	--nav: #00643a;
-	
+
 	--transition-duration: 0.3s;
 	--gap: 1rem;
 	--radius: 0.5rem;
@@ -25,7 +43,7 @@
 	--green-text: #fff;
 	--grey: #333;
 	--grey-text: #ccc;
-	
+
 	color-scheme: dark;
 	accent-color: var(--accent);
 }
@@ -35,7 +53,7 @@ body {
 	width: 100vw;
 	height: 100vh;
 	/* overflow: hidden; */
-	
+
 	background-color: var(--bg);
 	color: var(--text);
 
@@ -111,7 +129,12 @@ pre {
 	opacity: 0.8;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
 	margin: 0;
 	font-weight: 600;
 }
@@ -122,7 +145,8 @@ table {
 	overflow-x: auto;
 }
 
-th, td {
+th,
+td {
 	padding: 0.5rem;
 	text-align: left;
 	border-bottom: 1px solid var(--light);
