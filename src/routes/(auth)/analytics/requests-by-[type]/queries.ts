@@ -90,7 +90,7 @@ const platformSwitch = {
 export const requestsByKey = (since: Date, key: (typeof requestsByTypeToKey)[RequestsByType]) =>
 	analytics()
 		.collection('requests')
-		.aggregate(
+		.aggregate<Array<{ startTime: Date } & Record<string, number>>>(
 			[
 				// 1. Filter documents by time range
 				{

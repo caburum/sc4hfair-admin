@@ -42,3 +42,7 @@ export function addColors(inputs: string[]) {
 		color: generatePrettyColors(index, inputs.length)
 	}));
 }
+
+export function getColors(length: number) {
+	return Array.from({ length }, (_, index) => generatePrettyColors(index, length));
+}
