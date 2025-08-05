@@ -7,7 +7,8 @@ export const GET = async ({ params }) => {
 	try {
 		return text(await getSchema(id), {
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				'Content-Disposition': `attachment; filename="${id}.json"`
 			}
 		});
 	} catch (e) {

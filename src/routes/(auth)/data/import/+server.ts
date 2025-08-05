@@ -27,7 +27,9 @@ export const POST = ({ request, locals }) => {
 
 			const ts = () => ((performance.now() - start) / 1000).toFixed(3);
 			const resolve = (result: Omit<Result, 'ts'>) => {
-				emit('result', JSON.stringify({ ts: ts(), ...result }));
+				let entry = { ts: ts(), ...result } satisfies Result;
+				console.log(entry);
+				emit('result', JSON.stringify(entry));
 				lock.set(false);
 			};
 			const fail = (message: string) =>
@@ -36,11 +38,11 @@ export const POST = ({ request, locals }) => {
 					valid: false,
 					errors: [{ message }]
 				});
-			const log: Logger = (message, ...data) =>
-				emit(
-					'log',
-					JSON.stringify({ ts: ts(), message, data: data.length ? data : undefined } satisfies Log)
-				);
+			const log: Logger = (message, ...data) => {
+				let entry = { ts: ts(), message, data: data.length ? data : undefined } satisfies Log;
+				console.log(entry);
+				emit('log', JSON.stringify(entry));
+			};
 
 			const data = await request.formData();
 			const schemaId = data.get('schema')! as SchemaUploaderId;

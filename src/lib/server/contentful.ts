@@ -231,7 +231,7 @@ export async function bulkAction(
 
 			const bulkResult: BulkActionResponse = await bulkResponse.json();
 			log(
-				`waiting on bulk ${action}... status ${bulkResponse.status} ${bulkResult.sys.status}`,
+				`started bulk ${action} ${bulkResult.sys.id}... status ${bulkResponse.status} ${bulkResult.sys.status}`,
 				bulkResult
 			);
 
@@ -253,12 +253,12 @@ export async function bulkAction(
 
 				const statusResult: BulkActionResponse = await statusResponse.json();
 				const status = statusResult.sys.status;
-				log(`waiting on bulk ${action}... status ${status}`);
+				log(`waiting on bulk ${action} ${bulkResult.sys.id}... status ${status}`);
 
 				if (status === 'succeeded') {
 					return statusResult;
 				} else if (status === 'failed') {
-					log(`bulk ${action} failed`, statusResult.error);
+					log(`bulk ${action} ${bulkResult.sys.id} failed`, statusResult.error);
 					// throw new Error(`Bulk ${action} failed: ${JSON.stringify(statusResult.error)}`);
 				}
 			}

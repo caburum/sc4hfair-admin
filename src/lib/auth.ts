@@ -14,7 +14,7 @@ export interface User {
 	exp: number;
 }
 
-/** this must be used to secure all apis */
+/** checks if a user has access to some roles */
 export function isPermitted(userRoles: User['roles'], targetRoles: User['roles']): boolean {
 	// ROLES is an object with role names as keys and their hierarchy as values
 	// users who have a role with a higher hierarchy can automatically access lower roles

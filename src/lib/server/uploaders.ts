@@ -4,6 +4,7 @@ import {
 	conditionalBulkAction,
 	fetchContentful,
 	getEntries,
+	newId,
 	newIdFromString,
 	type BulkActionPayload,
 	type FullEntry,
@@ -119,7 +120,8 @@ export const uploaders = {
 		log(`found ${entries.length} existing events to compare against`);
 
 		log(`please wait, processing events...`);
-		let unaffected = 0;
+		let unaffected = 0,
+			completed = 0;
 		for (const entry of entries) {
 			const { id, version } = entry.sys;
 
@@ -136,6 +138,8 @@ export const uploaders = {
 			} else {
 				unaffected++;
 			}
+
+			if (!dry && ++completed % 20 === 0) log(`... ${completed} / ${entries.length} ...`);
 		}
 		log(`archiving ${result.archived.length} unmatched events`);
 		log(`not affecting ${unaffected} unmatched events`);
@@ -151,7 +155,131 @@ export const uploaders = {
 		await conditionalBulkAction(publishPayload, 'publish', dry, log);
 
 		return result;
-	}
-} as const satisfies Record<string, UploaderFunc>;
+	},
+
+	foodVendors: (async (data, dry, completeDataset, log = console.log) => {
+		const CONTENT_TYPE_ID = 'foodVendor';
+		const tempVendors = new Map<
+			string,
+			{
+				id?: string;
+				version?: number;
+				entry: PartialEntry;
+			}
+		>();
+		const result: Required<UploaderResult> = {
+			created: [],
+			updated: [],
+			archived: [],
+			errors: []
+		};
+
+		log(`provided ${data.length} food vendors to process`);
+
+		for (const { name, items } of data) {
+			if (!name) continue;
+
+			if (tempVendors.has(name)) {
+				result.errors.push({ message: `duplicate vendor name: ${name}` });
+				continue;
+			}
+
+			tempVendors.set(name, {
+				entry: {
+					metadata: {
+						tags: [
+							{
+								sys: {
+									type: 'Link',
+									linkType: 'Tag',
+									id: yearTagId
+								}
+							}
+						]
+					},
+					fields: {
+						name: { 'en-US': name },
+						items: {
+							'en-US': items.map((item) => ({
+								id: newId(),
+								key: item.name?.trim() ?? '',
+								value: item.price?.trim() ?? ''
+							}))
+						}
+					}
+				}
+			});
+		}
+
+		const entries = await getEntries({
+			'content_type': CONTENT_TYPE_ID,
+			'select': 'sys.id,sys.version,fields.name',
+			'sys.archivedAt[exists]': false,
+			'limit': 1000
+		});
+		log(`found ${entries.length} existing food vendors to compare against`);
+
+		log(`please wait, processing food vendors...`);
+		let unaffected = 0;
+		for (const entry of entries) {
+			const name = entry.fields.name?.['en-US'];
+			if (!name) continue;
+			const { id, version } = entry.sys;
+
+			if (tempVendors.has(name)) {
+				const vendor = tempVendors.get(name)!;
+				vendor.id = id;
+				vendor.version = version;
+				result.updated.push(id);
+			} else if (completeDataset) {
+				if (!dry) await archiveEntry(id, version);
+				result.archived.push(id);
+			} else {
+				unaffected++;
+			}
+		}
+		log(`archiving ${result.archived.length} unmatched food vendors`);
+		log(`not affecting ${unaffected} unmatched food vendors`);
+		log(`updating ${result.updated.length} matched food vendors`);
+
+		const publishPayload: BulkActionPayload[] = [];
+
+		for (const [vendorName, vendor] of tempVendors) {
+			let id = vendor.id;
+			if (!id) {
+				id = newIdFromString(vendorName);
+				result.created.push(id);
+			}
+
+			if (!dry) {
+				const res = await fetchContentful<FullEntry>(`entries/${id}`, {
+					method: 'PUT',
+					contentType: CONTENT_TYPE_ID,
+					version: vendor.version,
+					body: vendor.entry
+				});
+
+				if (![200, 201].includes(res.status)) {
+					result.errors.push({ vendorName, status: res.status, data: res.data });
+					continue;
+				}
+
+				publishPayload.push({
+					sys: {
+						id: id,
+						type: 'Link',
+						linkType: 'Entry',
+						version: res.data.sys.version
+					}
+				});
+			}
+		}
+		log(`creating ${result.created.length} new food vendors`);
+
+		await conditionalBulkAction(publishPayload, 'publish', dry, log);
+
+		return result;
+	}) satisfies UploaderFunc<{ name: string; items: { name: string; price: string }[] }>
+} as const satisfies Record<string, UploaderFunc<any>>;
 
 export type SchemaUploaderId = keyof typeof uploaders;

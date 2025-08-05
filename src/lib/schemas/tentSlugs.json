@@ -51,24 +51,26 @@
 	"food": "Food Tent",
 	"food-central": "Food Central",
 	"picnic-area": "Picnic Area",
+	"picnic-area-2": "Picnic Area",
 	"ice-cream": "Ice Cream",
 	"cotton-candy": "Cotton Candy",
 	"italian-ice": "Italian Ice",
-
-	"parking-general": "General Parking",
-	"parking-handicapped": "Handicapped Parking",
-	"shuttle-bus-drop": "Shuttle Bus Drop",
 
 	"restrooms-inside": "Restrooms",
 	"restrooms-porta-potty": "Restrooms",
 	"wash-rack-1": "Wash Rack",
 	"wash-rack-2": "Wash Rack",
 
-	"horse-ring-1": "Horse Ring 1",
-	"horse-ring-2": "Horse Ring 2",
+	"horse-ring-1": "Horse Ring",
+	"horse-ring-2": "Horse Ring",
 	"flying-field": "Flying Field",
 	"go-kart-track": "Go Kart Track",
 	"rc-cars-track": "RC Cars Track",
+
+	"parking-general": "General Parking",
+	"parking-handicapped": "Handicapped Parking",
+	"parking-combined": "General/Handicapped Parking",
+	"shuttle-bus-drop": "Shuttle Bus Drop",
 
 	"ted-blum-center": "4-H Center",
 	"park-commission-headquarters": "Park Commission Headquarters",

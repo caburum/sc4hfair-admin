@@ -1,0 +1,38 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://sc4hfair.app/schemas/foodVendors.json",
+	"title": "Food Vendors",
+	"description": "A schema defining a list of food vendors, where each vendor has a name and an object of menu items, with the item name as the key and the price as the value.",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"title": "Food Vendor",
+		"description": "Represents a single food vendor and their details.",
+		"required": ["name", "items"],
+		"properties": {
+			"name": {
+				"type": "string",
+				"description": "The full name of the food vendor."
+			},
+			"items": {
+				"type": "array",
+				"description": "An array of food items offered by the vendor.",
+				"items": {
+					"type": "object",
+					"required": ["name", "price"],
+					"properties": {
+						"name": {
+							"type": "string",
+							"description": "The name of the food item."
+						},
+						"price": {
+							"type": "string",
+							"description": "The price of the food item, formatted as a string (e.g., '$5.00'). This is an empty string if the price is not listed.",
+							"default": ""
+						}
+					}
+				}
+			}
+		}
+	}
+}
