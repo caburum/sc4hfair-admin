@@ -38,8 +38,11 @@
 						</ul>
 					</li>
 				{/if}
+				{#if isPermitted(data.user.roles, ['admin'])}
+					<li><a href="/analytics">analytics</a></li>
+				{/if}
 				{#if isPermitted(data.user.roles, ['dev'])}
-					<li><a href="/webhook">webhook</a></li>
+					<li><a href="/webhook">deploy</a></li>
 				{/if}
 				<li>
 					<form action="/api/auth/logout" method="POST"><button type="submit">logout</button></form>

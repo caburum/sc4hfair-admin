@@ -17,3 +17,4 @@ export async function disconnect(): Promise<void> {
 }
 
 export const db = () => client.db('users');
+export const analytics = () => client.db('analytics');

@@ -28,6 +28,7 @@
 		"ajv": "^8.17.1",
 		"ajv-formats": "^3.0.1",
 		"jose": "^6.0.12",
+		"layerchart": "^1.0.11",
 		"mongodb": "^6.18.0",
 		"sveltekit-sse": "^0.14.3"
 	}
