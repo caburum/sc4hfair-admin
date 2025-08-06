@@ -124,7 +124,7 @@
 		content: ' ▸ ';
 	}
 
-	header h1 a {
+	header a {
 		color: inherit;
 		text-decoration: none;
 	}
