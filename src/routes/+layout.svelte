@@ -55,7 +55,9 @@
 	</nav>
 
 	<header>
-		<Clover />
+		<a href="/" data-sveltekit-reload={true} onclick={() => (window.location.href = '/')}>
+			<Clover />
+		</a>
 		<h1>
 			{#each route as segment, i}
 				<span>

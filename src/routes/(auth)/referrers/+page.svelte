@@ -76,7 +76,7 @@
 			const [firstPoint, ...otherPoints] = detectedCode.cornerPoints;
 
 			// must be kept performant
-			ctx.strokeStyle = detectedCode.rawValue.includes('?referrer=') ? green : red;
+			ctx.strokeStyle = detectedCode.rawValue.includes('referrer=') ? green : red;
 			ctx.lineWidth = 2;
 			ctx.beginPath();
 			ctx.moveTo(firstPoint.x, firstPoint.y);
