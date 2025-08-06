@@ -67,16 +67,12 @@
 		}
 	}
 
-	const rootStyles = getComputedStyle(document.documentElement),
-		green = rootStyles.getPropertyValue('--accent'),
-		red = rootStyles.getPropertyValue('--red');
-
 	function track(detectedCodes: DetectedBarcode[], ctx: CanvasRenderingContext2D) {
 		for (const detectedCode of detectedCodes) {
 			const [firstPoint, ...otherPoints] = detectedCode.cornerPoints;
 
 			// must be kept performant
-			ctx.strokeStyle = detectedCode.rawValue.includes('referrer=') ? green : red;
+			ctx.strokeStyle = detectedCode.rawValue.includes('referrer=') ? '#009959' : '#b00020';
 			ctx.lineWidth = 2;
 			ctx.beginPath();
 			ctx.moveTo(firstPoint.x, firstPoint.y);
