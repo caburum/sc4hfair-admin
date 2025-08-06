@@ -30,4 +30,6 @@
 	legend={{ placement: 'top-right' }}
 />
 
+<!-- todo: add pie chart for shares over whole period -->
+
 <DebugInfo {data} />

@@ -3,11 +3,11 @@
 
 	const {
 		data,
-		open = $bindable(),
+		open = $bindable(false),
 		children
 	}: {
 		data?: any;
-		open: boolean;
+		open?: boolean;
 		children?: Snippet;
 	} = $props();
 </script>

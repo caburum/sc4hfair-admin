@@ -1,8 +1,9 @@
 export const ROLES = {
 	dev: 10,
 	admin: 5,
-	live: 1,
-	data: 1
+	live: 2,
+	data: 2,
+	analytics: 1
 } as const;
 
 export type Role = keyof typeof ROLES;

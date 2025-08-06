@@ -38,8 +38,9 @@
 						</ul>
 					</li>
 				{/if}
-				{#if isPermitted(data.user.roles, ['admin'])}
+				{#if isPermitted(data.user.roles, ['analytics'])}
 					<li><a href="/analytics">analytics</a></li>
+					<li><a href="/referrers">referrers</a></li>
 				{/if}
 				{#if isPermitted(data.user.roles, ['dev'])}
 					<li><a href="/webhook">deploy</a></li>
