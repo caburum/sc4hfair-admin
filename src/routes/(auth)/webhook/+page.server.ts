@@ -21,7 +21,9 @@ export const actions = {
 		if (id && id in hooks) {
 			const res = await fetch(hooks[id as keyof typeof hooks]!, { method: 'POST' });
 			const { job } = await res.json();
-			return { success: res.ok, status: res.status, message: job };
+
+			if (res.ok) return { success: true, status: res.status, message: job };
+			return fail(res.status, { success: false, status: res.status, message: job });
 		}
 
 		return fail(404, { success: false, message: 'Invalid webhook ID' });
