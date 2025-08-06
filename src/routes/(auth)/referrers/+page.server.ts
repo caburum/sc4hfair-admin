@@ -35,7 +35,7 @@ export const actions = {
 			longitude = Number(data.get('longitude')),
 			accuracy = Number(data.get('accuracy'));
 
-		if (!id || !name) return fail(400, { message: 'missing required fields' });
+		if (!id) return fail(400, { message: 'missing required fields' });
 
 		const entry = await analytics()
 			.collection('referrers')
