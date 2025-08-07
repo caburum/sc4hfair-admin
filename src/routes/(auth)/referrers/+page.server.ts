@@ -2,16 +2,10 @@ import type { Role } from '$lib/auth';
 import { currentYear } from '$lib/commonData.js';
 import { authenticate } from '$lib/server/auth';
 import { analytics } from '$lib/server/db.js';
+import type { Referrer } from '$lib/types';
 import { fail } from '@sveltejs/kit';
 
 const PERMS: Role[] = ['analytics'];
-
-export interface Referrer {
-	id: string;
-	name: string;
-	location: Pick<GeolocationCoordinates, 'latitude' | 'longitude' | 'accuracy'>;
-	year: number;
-}
 
 export const load = async ({ locals, url }) => {
 	authenticate(locals.user, PERMS);

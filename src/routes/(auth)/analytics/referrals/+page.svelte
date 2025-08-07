@@ -9,6 +9,7 @@
 <PieChart
 	data={data.referrals}
 	key="_id"
+	label={(d) => (d.name ? `${d.name} (${d._id})` : (d.location ? '📍' : '') + d._id)}
 	cRange={getColors(data.referrals.length)}
 	value="count"
 	outerRadius={160}

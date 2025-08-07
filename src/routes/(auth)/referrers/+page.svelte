@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Spinner from '$lib/assets/Spinner.svelte';
+	import ReferrerChart from '$lib/charts/ReferrerChart.svelte';
 	import DebugInfo from '$lib/components/DebugInfo.svelte';
 	import { BarqodeStream, type DetectedBarcode } from 'barqode';
-	import { geoMercator } from 'd3-geo';
-	import { Chart, Circle, GeoPoint, GeoTile, Layer, Text, Tooltip } from 'layerchart';
-	import { boundingBox } from './geo';
 
 	let { data, form } = $props();
 
@@ -95,17 +93,6 @@
 			if (detected) break; // stop at first detected code
 		}
 	}
-
-	let doubleScale = $derived(false); //(devicePixelRatio.current ?? 0) > 1);
-	const ACCESS_TOKEN =
-			'pk.eyJ1IjoiNGhjb21wdXRlcnMiLCJhIjoiY21keHdqcjlyMWsyZTJrb29razB2eThiayJ9.RBL6prZa_aBtfX9gg34NnQ',
-		STYLE = '4hcomputers/cmdxtrs22015y01s200c5eo4h',
-		mapboxServiceUrl = (x: number, y: number, z: number) => {
-			return `https://api.mapbox.com/styles/v1/${STYLE}/tiles/${z}/${x}/${y}${
-				doubleScale ? '@2x' : ''
-			}?access_token=${ACCESS_TOKEN}`;
-		};
-	let zoomDelta = $state(0);
 </script>
 
 <h1>referrer management</h1>
@@ -141,8 +128,6 @@
 		<input type="text" name="name" />
 	</label>
 
-	<!-- todo: map preview -->
-
 	<p>{gpsError || (!gps ? 'waiting for gps...' : '')}</p>
 	<pre>gps: {JSON.stringify(gps, null, '\t')}</pre>
 
@@ -156,61 +141,7 @@
 	<button type="submit" disabled={!gps || !!gpsError}>create</button>
 </form>
 
-<div class="relative h-[600px] overflow-hidden">
-	<Chart
-		geo={{
-			projection: geoMercator,
-			fitGeojson: boundingBox,
-			applyTransform: ['translate', 'scale']
-		}}
-		transform={{
-			initialScrollMode: 'scale'
-		}}
-	>
-		{#snippet children({ context })}
-			<Layer type="svg">
-				<GeoTile url={mapboxServiceUrl} {zoomDelta} />
-
-				{#each data.referrers as referrer (referrer.id)}
-					<GeoPoint lat={referrer.location.latitude} long={referrer.location.longitude}>
-						<Circle r={2} class="fill-white stroke-primary" />
-						<Text
-							y="-6"
-							value={referrer.id}
-							textAnchor="middle"
-							class="stroke-surface-100 [stroke-width:2px] text-[8px]"
-						/>
-					</GeoPoint>
-					<!-- todo: GeoCircle of accuracy -->
-				{/each}
-
-				{#if gps}
-					<GeoPoint lat={gps.latitude} long={gps.longitude}>
-						<Circle r={4} class="fill-primary stroke-white" />
-						<Text
-							y="-8"
-							value="you"
-							textAnchor="middle"
-							class="stroke-surface-100 [stroke-width:2px] text-[10px]"
-						/>
-					</GeoPoint>
-				{/if}
-			</Layer>
-
-			<Tooltip.Root>
-				{#snippet children({ data })}
-					{@const [longitude, latitude] =
-						context.geo.projection?.invert?.([context.tooltip.x, context.tooltip.y]) ?? []}
-					<Tooltip.Header>{data.properties.name}</Tooltip.Header>
-					<Tooltip.List>
-						<Tooltip.Item label="longitude" value={longitude} format="decimal" />
-						<Tooltip.Item label="latitude" value={latitude} format="decimal" />
-					</Tooltip.List>
-				{/snippet}
-			</Tooltip.Root>
-		{/snippet}
-	</Chart>
-</div>
+<ReferrerChart referrers={data.referrers} {gps} />
 
 <h2>list</h2>
 <ul>
