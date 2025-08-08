@@ -14,7 +14,5 @@ export const load = async ({ params, url }) => {
 	const since = new Date(url.searchParams.get('since') || Date.now() - 24 * 3600_000);
 	const requests = await requestsByKey(since, requestsByTypeToKey[type]);
 
-	console.log('requests', requests);
-
 	return { requests };
 };

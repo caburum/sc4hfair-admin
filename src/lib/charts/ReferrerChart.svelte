@@ -55,8 +55,8 @@
 					<GeoPoint lat={referrer.location.latitude} long={referrer.location.longitude}>
 						<Circle
 							r={2}
-							style={`stroke-width: ${3 + (referrer.count ?? 0) * 2}px; stroke-opacity: 0.8; paint-order: stroke;`}
-							class="fill-white stroke-primary"
+							style={`stroke-width: ${3 + (referrer.count ?? 0) * 2}px; stroke-opacity: 0.8; paint-order: stroke; ${referrer.id.startsWith('sh-') ? 'stroke: var(--yellow);' : ''}`}
+							class={`fill-white stroke-primary`}
 						/>
 						{#if labels}
 							<Text

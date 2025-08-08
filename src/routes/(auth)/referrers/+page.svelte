@@ -19,7 +19,7 @@
 	const gpsSuccessCallback = ({ coords, timestamp }: GeolocationPosition) => {
 		if (timestamp < Date.now() - MAX_GPS_AGE) {
 			gpsError = 'gps data is too old';
-		} else if (coords.accuracy > 10) {
+		} else if (coords.accuracy > 5) {
 			gpsError = 'gps accuracy is too low, try using a mobile device';
 		} else if (gpsError) gpsError = ''; // reset error if gps is valid
 		gps = coords;
