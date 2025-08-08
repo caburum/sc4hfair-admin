@@ -5,18 +5,26 @@
 	import MapTile from './MapTile.svelte';
 	import { boundingBox } from './geo';
 
+	type AnalyzableReferrer = Referrer & { count?: number };
+
 	const {
 		referrers,
-		gps
+		gps,
+		labels = true
 	}: {
-		referrers: Referrer[];
+		referrers: AnalyzableReferrer[];
 		gps?: GeolocationCoordinates | null;
+		labels?: boolean;
 	} = $props();
+
+	let mappedReferrers = $derived(
+		referrers.filter((r) => r.location) as Require<AnalyzableReferrer, 'location'>[]
+	);
 </script>
 
 <div class="relative h-[600px] cursor-grab touch-none overflow-hidden select-none">
 	<Chart
-		data={referrers}
+		data={mappedReferrers}
 		x={(d) => d.location.longitude}
 		y={(d) => d.location.latitude}
 		geo={{
@@ -43,15 +51,21 @@
 			<Layer type="svg">
 				<MapTile />
 
-				{#each referrers as referrer (referrer.id)}
+				{#each mappedReferrers as referrer (referrer.id)}
 					<GeoPoint lat={referrer.location.latitude} long={referrer.location.longitude}>
-						<Circle r={3} class="fill-white stroke-primary" />
-						<Text
-							y="0"
-							value={referrer.name || referrer.id}
-							textAnchor="middle"
-							class="stroke-surface-100 [stroke-width:2px] text-[.5em]"
+						<Circle
+							r={2}
+							style={`stroke-width: ${3 + (referrer.count ?? 0) * 2}px; stroke-opacity: 0.8; paint-order: stroke;`}
+							class="fill-white stroke-primary"
 						/>
+						{#if labels}
+							<Text
+								y="0"
+								value={referrer.name || referrer.id}
+								textAnchor="middle"
+								class="stroke-surface-100 [stroke-width:2px] text-[.5em]"
+							/>
+						{/if}
 					</GeoPoint>
 					<!-- todo: GeoCircle of accuracy -->
 				{/each}
@@ -81,6 +95,7 @@
 					<Tooltip.List>
 						<Tooltip.Item label="longitude" value={data.location.longitude} />
 						<Tooltip.Item label="latitude" value={data.location.latitude} />
+						{#if data.count}<Tooltip.Item label="count" value={data.count} />{/if}
 					</Tooltip.List>
 				{/snippet}
 			</Tooltip.Root>

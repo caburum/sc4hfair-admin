@@ -17,6 +17,7 @@ declare global {
 		// interface Platform {}
 	}
 
+	type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 	type Require<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
 	type Logger = (message: string, ...data: any[]) => void;

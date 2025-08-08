@@ -159,6 +159,7 @@ th {
 
 tr:hover {
 	background-color: var(--light);
+	color: var(--text);
 }
 
 .card {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { dev } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import Spinner from '$lib/assets/Spinner.svelte';
 	import ReferrerChart from '$lib/charts/ReferrerChart.svelte';
@@ -7,7 +8,7 @@
 
 	let { data, form } = $props();
 
-	let paused = $state(true),
+	let paused = $state(dev),
 		id = $state(''),
 		qrLoading = $state(true),
 		gpsWatchId = $state<number | null>(null),
@@ -49,7 +50,12 @@
 	const extractReferrer = (urlOrId: string) => {
 		try {
 			const parsedUrl = new URL(urlOrId);
-			return parsedUrl.searchParams.get('referrer') || false;
+			const referrer = parsedUrl.searchParams.get('referrer') || false;
+
+			const code = parsedUrl.searchParams.get('code');
+			if (referrer === 'sh' && code) return `sh-${code}`;
+
+			return referrer;
 		} catch {
 			return false;
 		}

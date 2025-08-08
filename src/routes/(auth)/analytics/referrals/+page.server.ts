@@ -7,10 +7,11 @@ export const load = async ({ url }) => {
 	);
 	const until = new Date(since.getFullYear(), 11, 31, 23, 59, 59, 999);
 
+	// todo: include unscanned referrers too
 	const referrals = await analytics()
 		.collection('requests')
 		.aggregate<{
-			_id: string;
+			id: string;
 			count: number;
 			name?: string;
 			location?: { longitude: number; latitude: number; accuracy: number };
@@ -47,10 +48,15 @@ export const load = async ({ url }) => {
 				}
 			},
 			{
-				$unset: ['referrer', 'id']
+				$addFields: {
+					id: '$_id'
+				}
 			},
 			{
-				$sort: { _id: 1 }
+				$unset: ['referrer', '_id']
+			},
+			{
+				$sort: { id: 1 }
 			}
 		])
 		.toArray();
