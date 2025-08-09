@@ -20,6 +20,13 @@
 	let mappedReferrers = $derived(
 		referrers.filter((r) => r.location) as Require<AnalyzableReferrer, 'location'>[]
 	);
+
+	const color = (referrer: AnalyzableReferrer) =>
+		'var(--' +
+		(referrer.id.startsWith('sh-') ? 'yellow'
+		: referrer.count === 0 ? 'red'
+		: 'accent') +
+		')';
 </script>
 
 <div class="relative h-[600px] cursor-grab touch-none overflow-hidden select-none">
@@ -44,8 +51,16 @@
 	>
 		{#snippet children({ context })}
 			<div class="absolute right-0 z-[100] m-(--spacing)">
-				<button class="aspect-square" onclick={context.transform.zoomIn}>+</button>
-				<button class="aspect-square" onclick={context.transform.zoomOut}>-</button>
+				<button
+					class="aspect-square"
+					onclick={context.transform.zoomIn}
+					ondblclick={(e) => e.stopPropagation()}>+</button
+				>
+				<button
+					class="aspect-square"
+					onclick={context.transform.zoomOut}
+					ondblclick={(e) => e.stopPropagation()}>-</button
+				>
 			</div>
 
 			<Layer type="svg">
@@ -55,8 +70,8 @@
 					<GeoPoint lat={referrer.location.latitude} long={referrer.location.longitude}>
 						<Circle
 							r={2}
-							style={`stroke-width: ${3 + (referrer.count ?? 0) * 2}px; stroke-opacity: 0.8; paint-order: stroke; ${referrer.id.startsWith('sh-') ? 'stroke: var(--yellow);' : ''}`}
-							class={`fill-white stroke-primary`}
+							style={`stroke-width: ${3 + (referrer.count ?? 0) * 2}px; stroke-opacity: 0.8; paint-order: stroke; stroke: ${color(referrer)}`}
+							class={`stroke fill-white`}
 						/>
 						{#if labels}
 							<Text

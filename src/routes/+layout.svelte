@@ -11,7 +11,8 @@
 		['sc4hfair-admin', ...page.url.pathname.split('/').slice(1)].filter(Boolean)
 	);
 
-	let open = $derived(new MediaQuery('(min-width: 768px)').current);
+	let mobile = $derived(new MediaQuery('(max-width: 768px)').current);
+	let open = $derived(!mobile);
 </script>
 
 <svelte:head>
@@ -23,7 +24,13 @@
 		<button class="menu-button" onclick={() => (open = !open)} aria-label="Toggle navigation">
 			<div class="hamburger-icon"></div>
 		</button>
-		<ul>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<ul
+			onclick={(e) => {
+				if (mobile && (e.target as HTMLElement | null)?.tagName === 'A') open = false;
+			}}
+		>
 			{#if data.user !== null}
 				<li><a href="/">info</a></li>
 				<!-- todo: centralize permissions by route -->
