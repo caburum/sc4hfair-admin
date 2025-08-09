@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { beforeNavigate, invalidateAll } from '$app/navigation';
 	import { isPermitted, ROLES, type Role } from '$lib/auth';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { Change, DbUser } from './+page.server';
@@ -68,6 +68,14 @@
 	function getAllChanges() {
 		return Array.from(roleChanges.values()).flat();
 	}
+
+	beforeNavigate(({ cancel }) => {
+		if (
+			roleChanges.size > 0 &&
+			!confirm('you have unsaved changes, are you sure you want to leave?')
+		)
+			cancel();
+	});
 </script>
 
 <h1>user management</h1>
@@ -77,8 +85,9 @@
 	include:
 </p>
 <ul>
-	<li>live: access to realtime fair operational tools (like notifications)</li>
-	<li>data: access to data management tools</li>
+	<li>analytics: access to analytics</li>
+	<li>live: access to analytics & realtime fair operational tools (like notifications)</li>
+	<li>data: access to analytics & data management tools</li>
 	<li>admin: access to all of the above, with user management</li>
 	<li>dev: access to all of the above, with advanced development/debugging tools</li>
 </ul>

@@ -8,6 +8,6 @@
 	{#each Object.keys(requestsByTypeToKey) as type}
 		<li><a href={`/analytics/requests-by-${type}`}>requests by {type}</a></li>
 	{/each}
-	<li><a href={`/analytics/referrals`}>referrals</a></li>
-	<li><a href={`/analytics/urls`}>urls</a></li>
+	<li><a href="/analytics/referrals">referrals</a></li>
+	<li><a href="/analytics/urls">urls</a></li>
 </ul>

@@ -110,7 +110,7 @@
 					<Tooltip.List>
 						<Tooltip.Item label="longitude" value={data.location.longitude} />
 						<Tooltip.Item label="latitude" value={data.location.latitude} />
-						{#if data.count}<Tooltip.Item label="count" value={data.count} />{/if}
+						{#if data.count !== undefined}<Tooltip.Item label="count" value={data.count} />{/if}
 					</Tooltip.List>
 				{/snippet}
 			</Tooltip.Root>
